@@ -1,0 +1,6 @@
+{
+  "name": "SMC 策略測試器",
+  "description": "一個多頁面Web應用程式，用於介紹、模擬和測試各種基於智能貨幣概念 (SMC) 的交易策略。使用者可以在模擬的歷史金融數據上互動式地探索每種策略。",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

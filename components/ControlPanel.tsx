@@ -74,7 +74,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onRunTest,
   isLoading,
 }) => {
-  const selectStyle = "w-full p-3 bg-gray-600 border border-gray-500 rounded-lg shadow-sm focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-colors text-gray-200 placeholder-gray-400 disabled:opacity-50 disabled:bg-gray-500";
+  const selectStyle = "w-full p-3 bg-gray-600 border border-gray-500 rounded-lg shadow-sm focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-colors text-white placeholder-gray-400 disabled:opacity-50 disabled:bg-gray-500";
   
   const calculatedTestPeriodDisplay = useMemo(() => {
     const endDate = new Date(); // Current time is always the end
@@ -156,7 +156,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
       
       <div className="p-5 bg-gray-800 rounded-xl shadow-xl border border-gray-700 space-y-3 transform hover:scale-[1.01] transition-transform duration-300">
-        <label htmlFor="start-datetime" className="block text-sm font-medium text-gray-300 text-center tracking-wider">
+        <label htmlFor="start-datetime" className="block text-sm font-medium text-gray-300 text-center tracking-wider mb-4">
           回溯開始時間
         </label>
         <input
@@ -166,7 +166,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             min={formatTimestampForDateTimeLocal(minAllowedStartTimestamp)}
             max={formatTimestampForDateTimeLocal(maxAllowedStartTimestamp)}
             onChange={handleStartTimeChange}
-            className={`${selectStyle} text-center tabular-nums`}
+            className={`${selectStyle} text-center tabular-nums py-4`}
             disabled={isLoading}
             aria-label="選擇回溯開始日期與時間"
         />
@@ -176,13 +176,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         >
             測試時長: {formatMillisecondsToDHMS(currentLookbackDurationMs)}
         </div>
-         <div className="text-xs text-gray-400 mt-2 px-1 pt-2 border-t border-gray-700/50 space-y-1">
+         <div className="text-xs text-white mt-2 px-1 pt-2 border-t border-gray-700/50 space-y-1">
             <p>最早可選: {new Date(minAllowedStartTimestamp).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12:false })}</p>
             <p>最晚可選: {new Date(maxAllowedStartTimestamp).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12:false })}</p>
         </div>
       </div>
 
-      <div className="text-xs text-gray-400 p-3 bg-gray-600 rounded-md shadow">
+      <div className="text-xs text-white p-3 bg-gray-600 rounded-md shadow">
         <p>預計測試開始: {calculatedTestPeriodDisplay.start}</p>
         <p>預計測試結束: {calculatedTestPeriodDisplay.end} (目前時間)</p>
       </div>

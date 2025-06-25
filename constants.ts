@@ -29,21 +29,31 @@ export const STRATEGIES_DEFINITIONS: StrategyDefinition[] = [
       timeframe: placeholderExplanationTimeframe,
       priceData: [
         { time: 1, price: 1.1000 },
-        { time: 2, price: 1.0980 }, // Start of OB (bearish candle before upmove for bullish OB)
-        { time: 3, price: 1.0970 }, // OB Low
-        { time: 4, price: 1.0975 }, // OB High (end of bearish candle)
-        { time: 5, price: 1.1020 }, // Strong move up (MSS)
-        { time: 6, price: 1.1010 },
-        { time: 7, price: 1.0990 }, // Retest starts
-        { time: 8, price: 1.0978 }, // Enters OB
-        { time: 9, price: 1.1030 }, // Bounce from OB
-        { time: 10, price: 1.1040 },
+        { time: 2, price: 1.0995 },
+        { time: 3, price: 1.0985 },
+        { time: 4, price: 1.0980 }, // Start of OB (bearish candle before upmove for bullish OB)
+        { time: 5, price: 1.0970 }, // OB Low
+        { time: 6, price: 1.0975 }, // OB High (end of bearish candle)
+        { time: 7, price: 1.0985 },
+        { time: 8, price: 1.1020 }, // Strong move up (MSS)
+        { time: 9, price: 1.1015 },
+        { time: 10, price: 1.1010 },
+        { time: 11, price: 1.1005 },
+        { time: 12, price: 1.0990 }, // Retest starts
+        { time: 13, price: 1.0985 },
+        { time: 14, price: 1.0978 }, // Enters OB
+        { time: 15, price: 1.0982 },
+        { time: 16, price: 1.1005 },
+        { time: 17, price: 1.1030 }, // Bounce from OB
+        { time: 18, price: 1.1035 },
+        { time: 19, price: 1.1040 },
+        { time: 20, price: 1.1045 },
       ],
       highlights: [
-        { id: 'ob-area', type: HighlightType.AREA, x1: 2.5, x2: 4.5, y1: 1.0970, y2: 1.0980, label: '看漲訂單塊 (Bullish OB)', color: 'rgba(74, 222, 128, 0.35)' }, // Opacity increased
-        { id: 'mss-line', type: HighlightType.LINE, y1: 1.1000, isHorizontal: true, x1: 0.5, x2: 4.8, label: '先前高點 (結構)', color: '#FBBF24', },
-        { id: 'mss-break', type: HighlightType.DOT, x: 5, y: 1.1020, label: '市場結構轉變 (MSS)', color: '#FBBF24' },
-        { id: 'entry-dot', type: HighlightType.DOT, x: 8, y: 1.0978, label: '回測OB進場', color: '#60A5FA' },
+        { id: 'ob-area', type: HighlightType.AREA, x1: 4.5, x2: 6.5, y1: 1.0970, y2: 1.0980, label: '看漲訂單塊 (Bullish OB)', color: 'rgba(74, 222, 128, 0.35)' },
+        { id: 'mss-line', type: HighlightType.LINE, y1: 1.1000, isHorizontal: true, x1: 0.5, x2: 7.8, label: '先前高點 (結構)', color: '#FBBF24', },
+        { id: 'mss-break', type: HighlightType.DOT, x: 8, y: 1.1020, label: '市場結構轉變 (MSS)', color: '#FBBF24' },
+        { id: 'entry-dot', type: HighlightType.DOT, x: 14, y: 1.0978, label: '回測OB進場', color: '#60A5FA' },
       ],
     },
   },
@@ -59,20 +69,31 @@ export const STRATEGIES_DEFINITIONS: StrategyDefinition[] = [
       timeframe: placeholderExplanationTimeframe,
       priceData: [ // Bearish Breaker example
         { time: 1, price: 1.1000 },
-        { time: 2, price: 1.1020 }, // Initial high (Swing High 1)
-        { time: 3, price: 1.1010 }, // Swing Low 1
-        { time: 4, price: 1.1030 }, // Higher High (Swing High 2 - Liquidity taken)
-        { time: 5, price: 1.0990 }, // Price drops, breaks Swing Low 1 (MSS)
-        { time: 6, price: 1.1000 }, // Retest towards breaker
-        { time: 7, price: 1.1008 }, // Enters breaker zone
-        { time: 8, price: 1.0980 }, // Rejects from breaker
-        { time: 9, price: 1.0970 },
+        { time: 2, price: 1.1010 },
+        { time: 3, price: 1.1020 }, // Initial high (Swing High 1)
+        { time: 4, price: 1.1015 },
+        { time: 5, price: 1.1010 }, // Swing Low 1
+        { time: 6, price: 1.1018 },
+        { time: 7, price: 1.1025 },
+        { time: 8, price: 1.1030 }, // Higher High (Swing High 2 - Liquidity taken)
+        { time: 9, price: 1.1020 },
+        { time: 10, price: 1.1005 },
+        { time: 11, price: 1.0990 }, // Price drops, breaks Swing Low 1 (MSS)
+        { time: 12, price: 1.0995 },
+        { time: 13, price: 1.1000 }, // Retest towards breaker
+        { time: 14, price: 1.1005 },
+        { time: 15, price: 1.1008 }, // Enters breaker zone
+        { time: 16, price: 1.1002 },
+        { time: 17, price: 1.0985 },
+        { time: 18, price: 1.0980 }, // Rejects from breaker
+        { time: 19, price: 1.0975 },
+        { time: 20, price: 1.0970 },
       ],
       highlights: [
-        { id: 'swing-low-1', type: HighlightType.LINE, y1: 1.1010, isHorizontal: true, x1: 2.5, x2: 4.8, label: '擺動低點 (成為Breaker)', color: '#FBBF24' },
-        { id: 'mss-breaker', type: HighlightType.DOT, x: 5, y: 1.0990, label: '跌破結構 (MSS)', color: '#F87171' },
-        { id: 'breaker-area', type: HighlightType.AREA, x1: 4.5, x2: 8.5, y1: 1.1005, y2: 1.1015, label: '看跌破壞塊 (Bearish Breaker)', color: 'rgba(248, 113, 113, 0.3)' },
-        { id: 'entry-breaker', type: HighlightType.DOT, x: 7, y: 1.1008, label: '回測Breaker進場', color: '#60A5FA' },
+        { id: 'swing-low-1', type: HighlightType.LINE, y1: 1.1010, isHorizontal: true, x1: 4.5, x2: 10.8, label: '擺動低點', color: '#FBBF24' },
+        { id: 'mss-breaker', type: HighlightType.DOT, x: 11, y: 1.0990, label: '跌破結構 (MSS)', color: '#F87171' },
+        { id: 'breaker-area', type: HighlightType.AREA, x1: 13, x2: 16.5, y1: 1.1005, y2: 1.1015, label: '看跌破壞塊', color: 'rgba(248, 113, 113, 0.3)' },
+        { id: 'entry-breaker', type: HighlightType.DOT, x: 15, y: 1.1008, label: '回測進場', color: '#60A5FA' },
       ],
     },
   },
@@ -88,19 +109,31 @@ export const STRATEGIES_DEFINITIONS: StrategyDefinition[] = [
       timeframe: placeholderExplanationTimeframe,
       priceData: [ // Bullish FVG example
         { time: 1, price: 1.1000 }, // Candle 0
-        { time: 2, price: 1.1010 }, // Candle 1 (its high forms FVG top)
-        { time: 3, price: 1.1040 }, // Candle 2 (strong move, creates gap)
-        { time: 4, price: 1.1025 }, // Candle 3 (its low forms FVG bottom)
-        { time: 5, price: 1.1015 }, // Retest starts
-        { time: 6, price: 1.1018 }, // Enters FVG
-        { time: 7, price: 1.1035 }, // Bounce from FVG
-        { time: 8, price: 1.1045 },
+        { time: 2, price: 1.1005 },
+        { time: 3, price: 1.1008 },
+        { time: 4, price: 1.1010 }, // Candle 1 (its high forms FVG top)
+        { time: 5, price: 1.1025 },
+        { time: 6, price: 1.1040 }, // Candle 2 (strong move, creates gap)
+        { time: 7, price: 1.1035 },
+        { time: 8, price: 1.1025 }, // Candle 3 (its low forms FVG bottom)
+        { time: 9, price: 1.1022 },
+        { time: 10, price: 1.1020 },
+        { time: 11, price: 1.1015 }, // Retest starts
+        { time: 12, price: 1.1016 },
+        { time: 13, price: 1.1018 }, // Enters FVG
+        { time: 14, price: 1.1022 },
+        { time: 15, price: 1.1030 },
+        { time: 16, price: 1.1035 }, // Bounce from FVG
+        { time: 17, price: 1.1042 },
+        { time: 18, price: 1.1045 },
+        { time: 19, price: 1.1048 },
+        { time: 20, price: 1.1050 },
       ],
       highlights: [
-        { id: 'fvg-area', type: HighlightType.AREA, x1: 3.5, x2: 7.5, y1: 1.1010, y2: 1.1025, label: '看漲FVG (Bullish FVG)', color: 'rgba(96, 165, 250, 0.3)' },
-        { id: 'c1-high', type: HighlightType.LINE, x1: 1.5, x2: 2.5, y1: 1.1010, isHorizontal: true, color: 'gray', label: 'K線1高點' },
-        { id: 'c3-low', type: HighlightType.LINE, x1: 3.5, x2: 4.5, y1: 1.1025, isHorizontal: true, color: 'gray', label: 'K線3低點' },
-        { id: 'entry-fvg', type: HighlightType.DOT, x: 6, y: 1.1018, label: '回測FVG進場', color: '#34D399' },
+        { id: 'fvg-area', type: HighlightType.AREA, x1: 6.5, x2: 14.5, y1: 1.1010, y2: 1.1025, label: '看漲FVG (Bullish FVG)', color: 'rgba(96, 165, 250, 0.3)' },
+        { id: 'c1-high', type: HighlightType.LINE, x1: 3.5, x2: 4.5, y1: 1.1010, isHorizontal: true, color: 'gray', label: 'K線1高點' },
+        { id: 'c3-low', type: HighlightType.LINE, x1: 7.5, x2: 8.5, y1: 1.1025, isHorizontal: true, color: 'gray', label: 'K線3低點' },
+        { id: 'entry-fvg', type: HighlightType.DOT, x: 13, y: 1.1018, label: '回測FVG進場', color: '#34D399' },
       ],
     },
   },
@@ -116,18 +149,28 @@ export const STRATEGIES_DEFINITIONS: StrategyDefinition[] = [
       timeframe: placeholderExplanationTimeframe,
       priceData: [ // Liquidity sweep of high, then bearish reversal
         { time: 1, price: 1.1000 },
-        { time: 2, price: 1.1020 }, // Previous High
-        { time: 3, price: 1.1010 },
-        { time: 4, price: 1.1015 },
-        { time: 5, price: 1.1025 }, // Sweeps above prev high
-        { time: 6, price: 1.1005 }, // Reverses below prev high
-        { time: 7, price: 1.0990 }, // Confirms reversal
-        { time: 8, price: 1.0980 },
+        { time: 2, price: 1.1005 },
+        { time: 3, price: 1.1015 },
+        { time: 4, price: 1.1020 }, // Previous High
+        { time: 5, price: 1.1012 },
+        { time: 6, price: 1.1010 },
+        { time: 7, price: 1.1008 },
+        { time: 8, price: 1.1015 },
+        { time: 9, price: 1.1018 },
+        { time: 10, price: 1.1025 }, // Sweeps above prev high
+        { time: 11, price: 1.1018 },
+        { time: 12, price: 1.1005 }, // Reverses below prev high
+        { time: 13, price: 1.1000 },
+        { time: 14, price: 1.0995 },
+        { time: 15, price: 1.0990 }, // Confirms reversal
+        { time: 16, price: 1.0985 },
+        { time: 17, price: 1.0980 },
+        { time: 18, price: 1.0975 },
       ],
       highlights: [
-        { id: 'prev-high', type: HighlightType.LINE, y1: 1.1020, isHorizontal: true, x1: 1.5, x2: 4.8, label: '先前高點 (流動性池)', color: '#FBBF24' },
-        { id: 'sweep-dot', type: HighlightType.DOT, x: 5, y: 1.1025, label: '掃蕩高點流動性', radius: 5, color: '#EF4444' },
-        { id: 'reversal-entry', type: HighlightType.DOT, x: 6.5, y: 1.1000, label: '反轉進場 (做空)', color: '#60A5FA' }, // Simplified entry
+        { id: 'prev-high', type: HighlightType.LINE, y1: 1.1020, isHorizontal: true, x1: 3.5, x2: 9.8, label: '先前高點 (流動性池)', color: '#FBBF24' },
+        { id: 'sweep-dot', type: HighlightType.DOT, x: 10, y: 1.1025, label: '掃蕩高點流動性', radius: 5, color: '#EF4444' },
+        { id: 'reversal-entry', type: HighlightType.DOT, x: 13, y: 1.1000, label: '反轉進場 (做空)', color: '#60A5FA' },
       ],
     },
   },
@@ -143,18 +186,28 @@ export const STRATEGIES_DEFINITIONS: StrategyDefinition[] = [
         timeframe: placeholderExplanationTimeframe,
         priceData: [ // Bullish MSS example (from downtrend to uptrend)
             { time: 1, price: 1.1050 }, // Start of downtrend LH
-            { time: 2, price: 1.1020 }, // LL
-            { time: 3, price: 1.1040 }, // LH2 (Previous Swing High for MSS)
-            { time: 4, price: 1.1010 }, // Lower Low 2
-            { time: 5, price: 1.1030 }, // Higher Low (Failure to make new LL)
-            { time: 6, price: 1.1055 }, // Breaks LH2 (MSS confirmed)
-            { time: 7, price: 1.1045 }, // Retest (optional)
-            { time: 8, price: 1.1060 }, // Continues up
+            { time: 2, price: 1.1035 },
+            { time: 3, price: 1.1025 },
+            { time: 4, price: 1.1020 }, // LL
+            { time: 5, price: 1.1030 },
+            { time: 6, price: 1.1040 }, // LH2 (Previous Swing High for MSS)
+            { time: 7, price: 1.1025 },
+            { time: 8, price: 1.1015 },
+            { time: 9, price: 1.1010 }, // Lower Low 2
+            { time: 10, price: 1.1020 },
+            { time: 11, price: 1.1030 }, // Higher Low (Failure to make new LL)
+            { time: 12, price: 1.1045 },
+            { time: 13, price: 1.1055 }, // Breaks LH2 (MSS confirmed)
+            { time: 14, price: 1.1050 },
+            { time: 15, price: 1.1045 }, // Retest (optional)
+            { time: 16, price: 1.1052 },
+            { time: 17, price: 1.1060 }, // Continues up
+            { time: 18, price: 1.1065 },
         ],
         highlights: [
-            { id: 'prev-lh', type: HighlightType.LINE, y1: 1.1040, isHorizontal: true, x1: 2.5, x2: 5.8, label: '先前擺動高點 (LH)', color: '#FBBF24'},
-            { id: 'mss-dot', type: HighlightType.DOT, x: 6, y: 1.1055, label: '市場結構轉變 (MSS)', radius: 5, color: '#34D399' },
-            { id: 'potential-entry', type: HighlightType.DOT, x: 7, y: 1.1045, label: '潛在進場點', color: '#60A5FA' }
+            { id: 'prev-lh', type: HighlightType.LINE, y1: 1.1040, isHorizontal: true, x1: 5.5, x2: 12.8, label: '先前擺動高點 (LH)', color: '#FBBF24'},
+            { id: 'mss-dot', type: HighlightType.DOT, x: 13, y: 1.1055, label: '市場結構轉變 (MSS)', radius: 5, color: '#34D399' },
+            { id: 'potential-entry', type: HighlightType.DOT, x: 15, y: 1.1045, label: '潛在進場點', color: '#60A5FA' }
         ]
     }
   },

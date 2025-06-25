@@ -187,33 +187,37 @@ export const generateSimulatedTrades = (params: SimulationParams, priceData: Sim
 
       case SMCStrategy.LIQUIDITY_SWEEP: {
         const sweepLookback = 10;
-        if (i < sweepLookback) break;
-        const prevDataForSweep = priceData.slice(i - sweepLookback, i);
-        if (prevDataForSweep.length === 0) break;
+        if (i < sweepLookback + 1) break; // Need at least `sweepLookback` candles before the sweep candle.
 
-        const prevHigh = Math.max(...prevDataForSweep.map(p=>p.price));
-        const prevLow = Math.min(...prevDataForSweep.map(p=>p.price));
-        const sweepCandle = priceData[i-1];
+        // Look for the high/low in the candles *before* the sweep candle.
+        const prevDataForSweep = priceData.slice(i - sweepLookback - 1, i - 1);
+        if (prevDataForSweep.length < sweepLookback) break;
 
-        if (sweepCandle.price > prevHigh && currentCandle.price < sweepCandle.price && currentCandle.price < prevHigh) { 
-            tradeSignal = {
-                entryTime: currentCandle.time,
-                entryPrice: currentCandle.price,
-                type: 'SHORT',
-                stopLoss: sweepCandle.price * 1.001, // Stop above sweep candle high
-                takeProfit: currentCandle.price - (sweepCandle.price * 1.001 - currentCandle.price) * riskRewardRatio,
-            };
-            explanation = `價格於 ${formatTimeForExplanation(sweepCandle.time)} (K線高點 ${sweepCandle.price.toFixed(priceDecimals)}) 掃蕩先前位於 ${prevHigh.toFixed(priceDecimals)} 之高點流動性。隨後於 ${formatTimeForExplanation(currentCandle.time)} 出現反轉結構，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做空。`;
+        const prevHigh = Math.max(...prevDataForSweep.map(p => p.price));
+        const prevLow = Math.min(...prevDataForSweep.map(p => p.price));
+        const sweepCandle = priceData[i - 1];
+
+        // Bearish sweep: sweep candle takes out prevHigh, current candle reverses below prevHigh.
+        if (sweepCandle.price > prevHigh && currentCandle.price < prevHigh) {
+          tradeSignal = {
+            entryTime: currentCandle.time,
+            entryPrice: currentCandle.price,
+            type: 'SHORT',
+            stopLoss: sweepCandle.price, // Stop is placed at the high of the sweep candle
+            takeProfit: currentCandle.price - (sweepCandle.price - currentCandle.price) * riskRewardRatio,
+          };
+          explanation = `價格於 ${formatTimeForExplanation(sweepCandle.time)} (K線高點 ${sweepCandle.price.toFixed(priceDecimals)}) 掃蕩先前位於 ${prevHigh.toFixed(priceDecimals)} 之高點流動性。隨後於 ${formatTimeForExplanation(currentCandle.time)} 出現反轉結構，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做空。`;
         }
-        else if (sweepCandle.price < prevLow && currentCandle.price > sweepCandle.price && currentCandle.price > prevLow) { 
-            tradeSignal = {
-                entryTime: currentCandle.time,
-                entryPrice: currentCandle.price,
-                type: 'LONG',
-                stopLoss: sweepCandle.price * 0.999, // Stop below sweep candle low
-                takeProfit: currentCandle.price + (currentCandle.price - sweepCandle.price * 0.999) * riskRewardRatio,
-            };
-            explanation = `價格於 ${formatTimeForExplanation(sweepCandle.time)} (K線低點 ${sweepCandle.price.toFixed(priceDecimals)}) 掃蕩先前位於 ${prevLow.toFixed(priceDecimals)} 之低點流動性。隨後於 ${formatTimeForExplanation(currentCandle.time)} 出現反轉結構，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做多。`;
+        // Bullish sweep: sweep candle takes out prevLow, current candle reverses above prevLow.
+        else if (sweepCandle.price < prevLow && currentCandle.price > prevLow) {
+          tradeSignal = {
+            entryTime: currentCandle.time,
+            entryPrice: currentCandle.price,
+            type: 'LONG',
+            stopLoss: sweepCandle.price, // Stop is placed at the low of the sweep candle
+            takeProfit: currentCandle.price + (currentCandle.price - sweepCandle.price) * riskRewardRatio,
+          };
+          explanation = `價格於 ${formatTimeForExplanation(sweepCandle.time)} (K線低點 ${sweepCandle.price.toFixed(priceDecimals)}) 掃蕩先前位於 ${prevLow.toFixed(priceDecimals)} 之低點流動性。隨後於 ${formatTimeForExplanation(currentCandle.time)} 出現反轉結構，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做多。`;
         }
         break;
       }

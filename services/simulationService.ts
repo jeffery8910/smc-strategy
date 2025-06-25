@@ -87,55 +87,97 @@ export const generateSimulatedTrades = (params: SimulationParams, priceData: Sim
       }
 
       case SMCStrategy.ORDER_BLOCK: {
-        if (i > lookbackPeriod + 5) { 
-            const mssLookback = 5; 
-            const mssCandidateSlice = priceData.slice(i - mssLookback, i + 1);
-            
-            const mssConfirmationHighLookback = priceData.slice(i - mssLookback - 10, i - mssLookback);
-            const mssSwingHigh = mssConfirmationHighLookback.length > 0 ? Math.max(...mssConfirmationHighLookback.map(p => p.price)) : -Infinity;
-            
-            if (mssCandidateSlice.length > 1 && mssCandidateSlice[mssCandidateSlice.length-1].price > mssSwingHigh && mssCandidateSlice[mssCandidateSlice.length-2].price <= mssSwingHigh) {
-                const obCandidateSlice = priceData.slice(Math.max(0, i - mssLookback - 5), i - mssLookback); 
-                if (obCandidateSlice.length > 1) { // Need at least 2 for a range
-                    const obLowPrice = Math.min(...obCandidateSlice.map(p => p.price));
-                    const obHighPrice = Math.max(...obCandidateSlice.map(p => p.price));
-                    const obTime = obCandidateSlice[obCandidateSlice.length-1].time; // Time of the last candle forming OB
-                    
-                    if (currentCandle.price <= obHighPrice && currentCandle.price >= obLowPrice) { //Simplified: retests OB range
-                         tradeSignal = {
-                            entryTime: currentCandle.time,
-                            entryPrice: currentCandle.price,
-                            type: 'LONG',
-                            stopLoss: obLowPrice * 0.998, 
-                            takeProfit: currentCandle.price + (currentCandle.price - (obLowPrice * 0.998)) * riskRewardRatio,
-                        };
-                        explanation = `偵測到先前於 ${formatTimeForExplanation(obTime)} 形成的看漲訂單塊 (範圍 ${obLowPrice.toFixed(priceDecimals)} - ${obHighPrice.toFixed(priceDecimals)})。價格於 ${formatTimeForExplanation(currentCandle.time)} 回測此訂單塊，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做多。`;
-                    }
-                }
-            }
-            
-            const mssConfirmationLowLookback = priceData.slice(i - mssLookback - 10, i - mssLookback);
-            const mssSwingLow = mssConfirmationLowLookback.length > 0 ? Math.min(...mssConfirmationLowLookback.map(p => p.price)) : Infinity;
+        const obLookback = 10;
+        if (i < obLookback + 5) break; // Need sufficient lookback
 
-            if (mssCandidateSlice.length > 1 && mssCandidateSlice[mssCandidateSlice.length-1].price < mssSwingLow && mssCandidateSlice[mssCandidateSlice.length-2].price >= mssSwingLow) {
-                const obCandidateSlice = priceData.slice(Math.max(0, i - mssLookback - 5), i - mssLookback);
-                if (obCandidateSlice.length > 1) {
-                    const obLowPrice = Math.min(...obCandidateSlice.map(p => p.price));
-                    const obHighPrice = Math.max(...obCandidateSlice.map(p => p.price));
-                    const obTime = obCandidateSlice[obCandidateSlice.length-1].time;
-                    
-                    if (currentCandle.price >= obLowPrice && currentCandle.price <= obHighPrice) { //Simplified retest
-                        tradeSignal = {
-                            entryTime: currentCandle.time,
-                            entryPrice: currentCandle.price,
-                            type: 'SHORT',
-                            stopLoss: obHighPrice * 1.002, 
-                            takeProfit: currentCandle.price - ((obHighPrice * 1.002) - currentCandle.price) * riskRewardRatio,
-                        };
-                        explanation = `偵測到先前於 ${formatTimeForExplanation(obTime)} 形成的看跌訂單塊 (範圍 ${obLowPrice.toFixed(priceDecimals)} - ${obHighPrice.toFixed(priceDecimals)})。價格於 ${formatTimeForExplanation(currentCandle.time)} 回測此訂單塊，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做空。`;
-                    }
-                }
+        // Look for strong price movements that could indicate order block formation
+        const recentSlice = priceData.slice(i - 5, i + 1);
+        if (recentSlice.length < 4) break;
+
+        // Check for bullish order block: strong upward movement after a period of consolidation/decline
+        const strongMoveUp = recentSlice.some((candle, idx) => {
+          if (idx === 0) return false;
+          const prevCandle = recentSlice[idx - 1];
+          return (candle.price - prevCandle.price) / prevCandle.price > 0.004; // 0.4% move
+        });
+
+        if (strongMoveUp) {
+          // Find the last bearish/consolidation candle before the strong move (this forms the bullish OB)
+          let obCandleIndex = -1;
+          for (let j = i - 1; j >= i - obLookback; j--) {
+            if (j > 0 && priceData[j].price <= priceData[j - 1].price) {
+              // Check if this was followed by the strong move
+              const nextCandlesSlice = priceData.slice(j + 1, Math.min(j + 4, priceData.length));
+              const hasStrongMoveAfter = nextCandlesSlice.some(c => c.price > priceData[j].price * 1.003);
+              
+              if (hasStrongMoveAfter) {
+                obCandleIndex = j;
+                break;
+              }
             }
+          }
+
+          if (obCandleIndex > -1) {
+            const obCandle = priceData[obCandleIndex];
+            const obLow = obCandle.price * 0.999; // Approximate OB low
+            const obHigh = obCandle.price * 1.001; // Approximate OB high
+
+            // Check if current price is retesting the order block
+            if (currentCandle.price >= obLow && currentCandle.price <= obHigh && 
+                currentCandle.price < priceData[i - 1].price) { // Confirming retest downward movement
+              tradeSignal = {
+                entryTime: currentCandle.time,
+                entryPrice: currentCandle.price,
+                type: 'LONG',
+                stopLoss: obLow * 0.998,
+                takeProfit: currentCandle.price + (currentCandle.price - obLow * 0.998) * riskRewardRatio,
+              };
+              explanation = `偵測到看漲訂單塊。於 ${formatTimeForExplanation(obCandle.time)} 形成訂單塊 (價格 ${obCandle.price.toFixed(priceDecimals)})，隨後出現強勁上漲。價格於 ${formatTimeForExplanation(currentCandle.time)} 回測此訂單塊區域 (${obLow.toFixed(priceDecimals)} - ${obHigh.toFixed(priceDecimals)})，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做多。`;
+            }
+          }
+        }
+
+        // Check for bearish order block: strong downward movement after a period of consolidation/rise
+        const strongMoveDown = recentSlice.some((candle, idx) => {
+          if (idx === 0) return false;
+          const prevCandle = recentSlice[idx - 1];
+          return (prevCandle.price - candle.price) / prevCandle.price > 0.004; // 0.4% move
+        });
+
+        if (strongMoveDown) {
+          // Find the last bullish/consolidation candle before the strong move (this forms the bearish OB)
+          let obCandleIndex = -1;
+          for (let j = i - 1; j >= i - obLookback; j--) {
+            if (j > 0 && priceData[j].price >= priceData[j - 1].price) {
+              // Check if this was followed by the strong move down
+              const nextCandlesSlice = priceData.slice(j + 1, Math.min(j + 4, priceData.length));
+              const hasStrongMoveAfter = nextCandlesSlice.some(c => c.price < priceData[j].price * 0.997);
+              
+              if (hasStrongMoveAfter) {
+                obCandleIndex = j;
+                break;
+              }
+            }
+          }
+
+          if (obCandleIndex > -1) {
+            const obCandle = priceData[obCandleIndex];
+            const obLow = obCandle.price * 0.999; // Approximate OB low
+            const obHigh = obCandle.price * 1.001; // Approximate OB high
+
+            // Check if current price is retesting the order block
+            if (currentCandle.price >= obLow && currentCandle.price <= obHigh && 
+                currentCandle.price > priceData[i - 1].price) { // Confirming retest upward movement
+              tradeSignal = {
+                entryTime: currentCandle.time,
+                entryPrice: currentCandle.price,
+                type: 'SHORT',
+                stopLoss: obHigh * 1.002,
+                takeProfit: currentCandle.price - (obHigh * 1.002 - currentCandle.price) * riskRewardRatio,
+              };
+              explanation = `偵測到看跌訂單塊。於 ${formatTimeForExplanation(obCandle.time)} 形成訂單塊 (價格 ${obCandle.price.toFixed(priceDecimals)})，隨後出現強勁下跌。價格於 ${formatTimeForExplanation(currentCandle.time)} 回測此訂單塊區域 (${obLow.toFixed(priceDecimals)} - ${obHigh.toFixed(priceDecimals)})，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做空。`;
+            }
+          }
         }
         break;
       }
@@ -180,6 +222,71 @@ export const generateSimulatedTrades = (params: SimulationParams, priceData: Sim
               };
               explanation = `偵測到近似看跌公允價值缺口 (FVG)，由 ${formatTimeForExplanation(p0Candle.time)} 之K線 (價格 ${p0Candle.price.toFixed(priceDecimals)}) 與 ${formatTimeForExplanation(p1Candle.time)} 之K線 (價格 ${p1Candle.price.toFixed(priceDecimals)}) 界定 (近似範圍 ${fvgLowApprox.toFixed(priceDecimals)} - ${fvgHighApprox.toFixed(priceDecimals)})。價格於 ${formatTimeForExplanation(p2Candle.time)} 進入此區域並於 ${p2Candle.price.toFixed(priceDecimals)} 進場做空。`;
             }
+          }
+        }
+        break;
+      }
+
+      case SMCStrategy.BREAKER_BLOCK: {
+        const breakerLookback = 12;
+        if (i < breakerLookback + 5) break; // Need sufficient lookback
+
+        // Find previous swing high and low in the lookback period
+        const swingLookbackSlice = priceData.slice(i - breakerLookback, i - 3);
+        if (swingLookbackSlice.length < 5) break;
+
+        const swingHighPrice = Math.max(...swingLookbackSlice.map(p => p.price));
+        const swingLowPrice = Math.min(...swingLookbackSlice.map(p => p.price));
+        
+        // Find the index of swing high and low in the original data
+        const swingHighIndex = priceData.findIndex((p, idx) => 
+          idx >= i - breakerLookback && idx < i - 3 && p.price === swingHighPrice);
+        const swingLowIndex = priceData.findIndex((p, idx) => 
+          idx >= i - breakerLookback && idx < i - 3 && p.price === swingLowPrice);
+
+        // Check for bearish breaker: price breaks above swing high, then fails and breaks swing low
+        const recentHigh = Math.max(...priceData.slice(i - 5, i).map(p => p.price));
+        const brokeSwingHighRecently = recentHigh > swingHighPrice;
+        const currentlyBelowSwingLow = currentCandle.price < swingLowPrice;
+
+        if (brokeSwingHighRecently && currentlyBelowSwingLow && swingHighIndex > -1) {
+          // The swing high area becomes a bearish breaker
+          const breakerLow = swingHighPrice * 0.999; // Slightly below the original swing high
+          const breakerHigh = swingHighPrice * 1.001; // Slightly above the original swing high
+          
+          // Check if price is retesting the breaker zone
+          if (currentCandle.price >= breakerLow && currentCandle.price <= breakerHigh) {
+            tradeSignal = {
+              entryTime: currentCandle.time,
+              entryPrice: currentCandle.price,
+              type: 'SHORT',
+              stopLoss: breakerHigh * 1.002,
+              takeProfit: currentCandle.price - (breakerHigh * 1.002 - currentCandle.price) * riskRewardRatio,
+            };
+            explanation = `偵測到看跌破壞塊。價格先前突破 ${swingHighPrice.toFixed(priceDecimals)} 擺動高點但未能維持，隨後跌破 ${swingLowPrice.toFixed(priceDecimals)} 擺動低點形成市場結構轉變。原擺動高點區域 (${breakerLow.toFixed(priceDecimals)} - ${breakerHigh.toFixed(priceDecimals)}) 現轉為阻力。於 ${formatTimeForExplanation(currentCandle.time)} 回測此破壞塊，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做空。`;
+          }
+        }
+
+        // Check for bullish breaker: price breaks below swing low, then fails and breaks swing high
+        const recentLow = Math.min(...priceData.slice(i - 5, i).map(p => p.price));
+        const brokeSwingLowRecently = recentLow < swingLowPrice;
+        const currentlyAboveSwingHigh = currentCandle.price > swingHighPrice;
+
+        if (brokeSwingLowRecently && currentlyAboveSwingHigh && swingLowIndex > -1) {
+          // The swing low area becomes a bullish breaker
+          const breakerLow = swingLowPrice * 0.999; // Slightly below the original swing low
+          const breakerHigh = swingLowPrice * 1.001; // Slightly above the original swing low
+          
+          // Check if price is retesting the breaker zone
+          if (currentCandle.price >= breakerLow && currentCandle.price <= breakerHigh) {
+            tradeSignal = {
+              entryTime: currentCandle.time,
+              entryPrice: currentCandle.price,
+              type: 'LONG',
+              stopLoss: breakerLow * 0.998,
+              takeProfit: currentCandle.price + (currentCandle.price - breakerLow * 0.998) * riskRewardRatio,
+            };
+            explanation = `偵測到看漲破壞塊。價格先前跌破 ${swingLowPrice.toFixed(priceDecimals)} 擺動低點但未能維持，隨後突破 ${swingHighPrice.toFixed(priceDecimals)} 擺動高點形成市場結構轉變。原擺動低點區域 (${breakerLow.toFixed(priceDecimals)} - ${breakerHigh.toFixed(priceDecimals)}) 現轉為支撐。於 ${formatTimeForExplanation(currentCandle.time)} 回測此破壞塊，於 ${currentCandle.price.toFixed(priceDecimals)} 進場做多。`;
           }
         }
         break;

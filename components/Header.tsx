@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center text-white hover:text-accent transition-colors">
-            <SvgPresentationChartLine className="w-8 h-8 md:w-10 md:h-10 mr-2 md:mr-3" />
+            <SvgPresentationChartLine className="w-12 h-12 mr-2 md:mr-3" />
             <h1 className="text-xl md:text-3xl font-bold">SMC 策略測試器</h1>
           </Link>
           
